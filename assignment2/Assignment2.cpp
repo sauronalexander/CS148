@@ -3,6 +3,7 @@
 #include "common/Utility/Mesh/Simple/PrimitiveCreator.h"
 #include "common/Utility/Mesh/Loading/MeshLoader.h"
 #include <cmath>
+#include <fstream>
 
 namespace
 {
@@ -90,12 +91,37 @@ void Assignment2::HandleWindowResize(float x, float y)
 void Assignment2::SetupExample1()
 {
     // Insert "Load and Compile Shaders" code here.
+	const std::string vertFilePath = std::string(STRINGIFY(SHADER_PATH)) + "/hw2/hw2.vert";
+	const std::string fragFilePath = std::string(STRINGIFY(SHADER_PATH)) + "/hw2/hw2.frag";
+
+	std::ifstream vertFile(vertFilePath);
+	std::ifstream fragFile(fragFilePath);
+
+	std::string vert((std::istreambuf_iterator<char>(vertFile)),
+		std::istreambuf_iterator<char>());
+	std::string frag((std::istreambuf_iterator<char>(fragFile)),
+		std::istreambuf_iterator<char>());
+	
+	const GLchar* vert_gltype = vert.c_str();
+	const GLchar* frag_gltype = frag.c_str();
 
     // Checkpoint 1.
     // Modify this part to contain your vertex shader ID, fragment shader ID, and shader program ID.
-    const GLuint vertexShaderId = 0;
-    const GLuint fragmentShaderId = 0;
-    const GLuint shaderProgramId = 0;
+    const GLuint vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+	const GLuint fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+	program = glCreateProgram();
+	const GLuint shaderProgramId = program;
+
+	// Compile shaders
+	glShaderSource(vertexShaderId, 1, &vert_gltype, NULL);
+	glShaderSource(fragmentShaderId, 1, &frag_gltype, NULL);
+	glCompileShader(vertexShaderId);
+	glCompileShader(fragmentShaderId);
+
+	// Link Program
+	glAttachShader(shaderProgramId, vertexShaderId);
+	glAttachShader(shaderProgramId, fragmentShaderId);
+	glLinkProgram(shaderProgramId);
 
     // DO NOT EDIT OR REMOVE THE CODE IN THIS SECTION
     if (!VerifyShaderCompile(vertexShaderId) || !VerifyShaderCompile(fragmentShaderId) || !VerifyProgramLink(shaderProgramId)) {
@@ -111,9 +137,38 @@ void Assignment2::SetupExample1()
     // FINISH DO NOT EDIT OR REMOVE THE CODE IN THIS SECTION
 
     // Insert "Setup Buffers" code here.
+	// Create VAO
+	GLuint vertexArrayID;
+	glGenVertexArrays(1, &vertexArrayID);
+	glBindVertexArray(vertexArrayID);
+
+	// Send Buffer to OpenGL
+	glGenBuffers(1, &vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER,
+		sizeof(glm::vec4) * vertexPositions.size(),
+		&vertexPositions[0],
+		GL_STATIC_DRAW);
+	
 }
 
 void Assignment2::Tick(double deltaTime)
 {
     // Insert "Send Buffers to the GPU" and "Slightly-More Advanced Shaders" code here.
+	time += deltaTime;
+	glUseProgram(program);
+	GLint uniformTime = glGetUniformLocation(program, "inputTime");
+	glUniform1f(uniformTime, time);
+
+	// Draw Triangles
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glVertexAttribPointer(0,
+		4,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		(void*)0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(0);
 }
