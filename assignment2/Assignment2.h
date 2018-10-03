@@ -35,7 +35,7 @@ private:
 
 	GLuint program;
 	
-	GLuint vertexBuffer;
+	GLuint vao;
 
 	double time;
 };

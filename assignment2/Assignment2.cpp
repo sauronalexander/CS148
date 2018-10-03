@@ -49,6 +49,7 @@ Assignment2::Assignment2(std::shared_ptr<class Scene> inputScene, std::shared_pt
             {-1.f, 1.f, 0.f, 1.f},
             {-1.f, 0.f, 0.f, 1.f}
         });
+	time = 0;
 }
 
 std::unique_ptr<Application> Assignment2::CreateApplication(std::shared_ptr<class Scene> scene, std::shared_ptr<class Camera> camera)
@@ -97,12 +98,20 @@ void Assignment2::SetupExample1()
 	std::ifstream vertFile(vertFilePath);
 	std::ifstream fragFile(fragFilePath);
 
+	
+	if (!vertFile.is_open()) {
+		std::cout << "Unable to find " << vertFilePath << std::endl;
+	}
+	if (!fragFile.is_open()) {
+		std::cout << "Unable to find" << fragFilePath << std::endl;
+	}
 	std::string vert((std::istreambuf_iterator<char>(vertFile)),
-		std::istreambuf_iterator<char>());
+		std::istreambuf_iterator<char>());		
+	const GLchar* vert_gltype = vert.c_str();
+
+	assert(fragFile.is_open());
 	std::string frag((std::istreambuf_iterator<char>(fragFile)),
 		std::istreambuf_iterator<char>());
-	
-	const GLchar* vert_gltype = vert.c_str();
 	const GLchar* frag_gltype = frag.c_str();
 
     // Checkpoint 1.
@@ -138,17 +147,24 @@ void Assignment2::SetupExample1()
 
     // Insert "Setup Buffers" code here.
 	// Create VAO
-	GLuint vertexArrayID;
-	glGenVertexArrays(1, &vertexArrayID);
-	glBindVertexArray(vertexArrayID);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
 
 	// Send Buffer to OpenGL
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	GLuint bufferID;
+	glGenBuffers(1, &bufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferID);
 	glBufferData(GL_ARRAY_BUFFER,
 		sizeof(glm::vec4) * vertexPositions.size(),
 		&vertexPositions[0],
 		GL_STATIC_DRAW);
+	glVertexAttribPointer(0,
+		4,
+		GL_FLOAT,
+		GL_FALSE,
+		0,
+		(void*)0);
+	glEnableVertexAttribArray(0);
 	
 }
 
@@ -156,19 +172,16 @@ void Assignment2::Tick(double deltaTime)
 {
     // Insert "Send Buffers to the GPU" and "Slightly-More Advanced Shaders" code here.
 	time += deltaTime;
+	int period = 20;
 	glUseProgram(program);
 	GLint uniformTime = glGetUniformLocation(program, "inputTime");
-	glUniform1f(uniformTime, time);
+	GLint uniformPeriod = glGetUniformLocation(program, "period");
+	int offset = time;
+	offset = offset - offset % period;
+	glUniform1i(uniformPeriod, period);
+	glUniform1f(uniformTime, time-offset);
 
 	// Draw Triangles
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glVertexAttribPointer(0,
-		4,
-		GL_FLOAT,
-		GL_FALSE,
-		0,
-		(void*)0);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glDisableVertexAttribArray(0);
+	glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
