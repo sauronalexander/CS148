@@ -173,11 +173,24 @@ void Assignment3::SetupExample2()
         return;
     }
 
+	std::vector<std::shared_ptr<RenderingObject>> planeTemplate = MeshLoader::LoadMesh(shader, "Sample_Ship.obj");
+	if (planeTemplate.empty()) {
+		std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
+		return;
+	}
+
     sceneObject = std::make_shared<SceneObject>(meshTemplate);
     scene->AddSceneObject(sceneObject);
 	sceneObject->MultScale(0.3);
 	sceneObject->Translate(glm::vec3(-5, 0, 0));
-
+	sceneObject = std::make_shared<SceneObject>(planeTemplate);
+	scene->AddSceneObject(sceneObject);
+	sceneObject->MultScale(3);
+	sceneObject->Translate(glm::vec3(-0.5, 0, -1));
+	sceneObject->Rotate(glm::vec3(SceneObject::GetWorldUp()), 0.1f);
+	sceneObject->Rotate(glm::vec3(SceneObject::GetWorldUp()), 0.1f);
+	sceneObject->Rotate(glm::vec3(SceneObject::GetWorldRight()), 0.1f);
+		
     std::unique_ptr<LightProperties> lightProperties = make_unique<LightProperties>();
     lightProperties->diffuseColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
 
