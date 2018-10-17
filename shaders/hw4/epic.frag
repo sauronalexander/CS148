@@ -1,6 +1,6 @@
 #version 330
 
-in vec4 fragmentColor;
+in vec4 fragmentColor; // c_base
 in vec4 vertexWorldPosition;
 in vec3 vertexWorldNormal;
 
@@ -43,7 +43,33 @@ vec4 pointLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
     float NdL = max(0, dot(N,L));
 
     // Insert code for Section 3.2 here.
-    return vec4(NdL);
+    // Lmbertian diffuse
+    vec4 c_diff = (1 - material.matMetallic) * fragmentColor;
+    vec4 c_spec = mix(material.matSpecular, fragmentColor, material.matMetallic);
+    vec4 d = c_diff / PI;
+    
+    // Specular
+    vec4 V = normalize(cameraPosition - vertexWorldPosition);
+    vec4 H = normalize(L + V);
+    float denom = 4. * max(0, dot(N, L)) * max(0, dot(N, V));
+
+    vec4 s = vec4(0.);
+    if (denom >0) {
+        s = vec4(0.);
+        float alpha_2 = pow(material.matRoughness, 4); 
+        float D = alpha_2 / (PI * pow(pow(max(0, dot(N, H)), 2)* (alpha_2 - 1) + 1, 2));
+        float k = pow((material.matRoughness + 1), 2) / 8.;
+        
+        float G_L = max(0, dot(N, L)) / (max(0, dot(N, L)) * (1 - k) + k);
+        float G_V = max(0, dot(N, V)) / (max(0, dot(N, V)) * (1 - k) + k);
+
+        float G = G_L / G_V;
+        float power = (-5.55473 * max(0, dot(V, H)) - 6.98316) * max(0, dot(V, H));
+        vec4 F = c_spec + (1 - c_spec) * pow(2, power);
+        s = D * F * G / denom;
+    }
+    vec4 final_color = NdL * (d * genericLight.diffuseColor + s * genericLight.specularColor);
+    return final_color;
 }
 
 vec4 directionalLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
