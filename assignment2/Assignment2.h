@@ -32,6 +32,10 @@ private:
     std::shared_ptr<class Light> pointLight;
 
     std::vector<glm::vec4> vertexPositions;
+    
+    GLuint vao;
+    float time;
+    GLuint program;
 };
 
 #endif

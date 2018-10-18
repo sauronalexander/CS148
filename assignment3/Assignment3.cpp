@@ -29,12 +29,12 @@ glm::vec2 Assignment3::GetWindowSize() const
 
 void Assignment3::SetupScene()
 {
-    SetupExample1();
+    SetupExample3();
 }
 
 void Assignment3::SetupCamera()
 {
-    camera->Translate(glm::vec3(0.f, 0.f, 10.f));
+    camera->Translate(glm::vec3(50.f, 60.f, 150.f));
 }
 
 void Assignment3::HandleInput(SDL_Keysym key, Uint32 state, Uint8 repeat, double timestamp, double deltaTime)
@@ -177,6 +177,53 @@ void Assignment3::SetupExample2()
 
     pointLight = std::make_shared<Light>(std::move(lightProperties));
     pointLight->SetPosition(glm::vec3(0.f, 0.f, 10.f));
+    scene->AddLight(pointLight);
+}
+
+void Assignment3::SetupExample3()
+{
+    scene->ClearScene();
+#ifndef DISABLE_OPENGL_SUBROUTINES
+    std::unordered_map<GLenum, std::string> shaderSpec = {
+        { GL_VERTEX_SHADER, "brdf/blinnphong/frag/blinnphong.vert" },
+        { GL_FRAGMENT_SHADER, "brdf/blinnphong/frag/blinnphong.frag"}
+    };
+#else
+    std::unordered_map<GLenum, std::string> shaderSpec = {
+        { GL_VERTEX_SHADER, "brdf/blinnphong/frag/noSubroutine/blinnphong.vert" },
+        { GL_FRAGMENT_SHADER, "brdf/blinnphong/frag/noSubroutine/blinnphong.frag"}
+    };
+#endif
+    std::shared_ptr<BlinnPhongShader> shader = std::make_shared<BlinnPhongShader>(shaderSpec, GL_FRAGMENT_SHADER);
+    shader->SetDiffuse(glm::vec4(0.8f, 0.8f, 0.8f, 1.f));
+    shader->SetAmbient(glm::vec4(0.5f));
+    
+    std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "car.obj");
+    if (meshTemplate.empty()) {
+        std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
+        return;
+    }
+    
+    std::vector<std::shared_ptr<RenderingObject>> meshTemplate1 = MeshLoader::LoadMesh(shader, "o.obj");
+    if (meshTemplate1.empty()) {
+        std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
+        return;
+    }
+    
+    sceneObject = std::make_shared<SceneObject>(meshTemplate);
+    sceneObject1 = std::make_shared<SceneObject>(meshTemplate1);
+    sceneObject->SetPosition(glm::vec3(0.0f, 0.0f,0.0f));
+    sceneObject1->SetPosition(glm::vec3(80.0f, 0.0f,0.0f));
+    sceneObject->MultScale(0.2);
+    sceneObject1->MultScale(5);
+    scene->AddSceneObject(sceneObject);
+    scene->AddSceneObject(sceneObject1);
+    
+    std::unique_ptr<LightProperties> lightProperties = make_unique<LightProperties>();
+    lightProperties->diffuseColor = glm::vec4(0.5f, 0.5f, 0.5f, 1.f);
+    
+    pointLight = std::make_shared<Light>(std::move(lightProperties));
+    pointLight->SetPosition(glm::vec3(50.f, 60.f, 100.f));
     scene->AddLight(pointLight);
 }
 
