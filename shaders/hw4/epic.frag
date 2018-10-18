@@ -45,7 +45,7 @@ vec4 pointLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
     // Insert code for Section 3.2 here.
     // Lmbertian diffuse
     vec4 c_diff = (1 - material.matMetallic) * fragmentColor;
-    vec4 c_spec = mix(material.matSpecular, fragmentColor, material.matMetallic);
+    vec4 c_spec = mix(0.08 * material.matSpecular, fragmentColor, material.matMetallic);
     vec4 d = c_diff / PI;
     
     // Specular
@@ -80,7 +80,7 @@ vec4 directionalLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 
     // Lmbertian diffuse
     vec4 c_diff = (1 - material.matMetallic) * fragmentColor;
-    vec4 c_spec = mix(material.matSpecular, fragmentColor, material.matMetallic);
+    vec4 c_spec = mix(0.08 * material.matSpecular, fragmentColor, material.matMetallic);
     vec4 d = c_diff / PI;
     
     // Specular
@@ -119,7 +119,7 @@ vec4 hemisphereLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
     
     // Lmbertian diffuse
     vec4 c_diff = (1 - material.matMetallic) * fragmentColor;
-    vec4 c_spec = mix(material.matSpecular, fragmentColor, material.matMetallic);
+    vec4 c_spec = mix(0.08 * material.matSpecular, fragmentColor, material.matMetallic);
     vec4 d = c_diff / PI;
     
     // Specular
@@ -166,7 +166,7 @@ vec4 spotLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
 
     // Lmbertian diffuse
     vec4 c_diff = (1 - material.matMetallic) * fragmentColor;
-    vec4 c_spec = mix(material.matSpecular, fragmentColor, material.matMetallic);
+    vec4 c_spec = mix(0.08 * material.matSpecular, fragmentColor, material.matMetallic);
     vec4 d = c_diff / PI;
     
     // Specular
