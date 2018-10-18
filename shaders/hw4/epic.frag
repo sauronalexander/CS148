@@ -184,7 +184,7 @@ vec4 spotLightSubroutine(vec4 N, vec4 worldPosition, vec3 worldNormal)
         float G_L = max(0, dot(N, L)) / (max(0, dot(N, L)) * (1 - k) + k);
         float G_V = max(0, dot(N, V)) / (max(0, dot(N, V)) * (1 - k) + k);
 
-        float G = G_L / G_V;
+        float G = G_L * G_V;
         float power = (-5.55473 * max(0, dot(V, H)) - 6.98316) * max(0, dot(V, H));
         vec4 F = c_spec + (1 - c_spec) * pow(2, power);
         s = D * F * G / denom;
