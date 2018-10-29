@@ -22,7 +22,7 @@ std::shared_ptr<class Camera> Assignment4::CreateCamera()
     // Specify any old aspect ratio for now, we'll update it later once the window gets made!
     // Read more about Field of View: http://rg3.name/201210281829.html!
     // Note that our field of view is the VERTICAL field of view (in degrees).
-    return std::make_shared<PerspectiveCamera>(60.f, 1280.f / 720.f);
+    return std::make_shared<PerspectiveCamera>(120.f, 1280.f / 720.f);
 }
 
 glm::vec2 Assignment4::GetWindowSize() const
@@ -146,8 +146,33 @@ void Assignment4::SetupExample1()
     spotLight->Rotate(glm::vec3(SceneObject::GetWorldRight()), -M_PI / 2.f);
     scene->AddLight(spotLight);
 
-    GenericSetupExample(shader, groundShader);
+    SetupExample(shader, groundShader);
 
+}
+
+
+void Assignment4::SetupExample(std::shared_ptr<ShaderProgram> shader, std::shared_ptr<ShaderProgram> groundShader){
+    std::vector<std::shared_ptr<RenderingObject>> meshTemplate = MeshLoader::LoadMesh(shader, "o.obj");
+    if (meshTemplate.empty()) {
+        std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
+        return;
+    }
+    std::shared_ptr<class SceneObject> sceneObject = std::make_shared<SceneObject>(meshTemplate);
+    scene->AddSceneObject(sceneObject);
+
+    std::vector<std::shared_ptr<RenderingObject>> meshTemplate1 = MeshLoader::LoadMesh(shader, "car.obj");
+    if (meshTemplate1.empty()) {
+        std::cerr << "ERROR: Failed to load the model. Check your paths." << std::endl;
+        return;
+    }
+    std::shared_ptr<class SceneObject> sceneObject1 = std::make_shared<SceneObject>(meshTemplate1);
+    sceneObject1->SetPosition(glm::vec3(0.0f, 0.0f,0.0f));
+    sceneObject->SetPosition(glm::vec3(80.0f, 0.0f,0.0f));
+    sceneObject1->MultScale(0.1);
+    sceneObject->MultScale(5);
+    scene->AddSceneObject(sceneObject1);
+    
+    
 }
 
 void Assignment4::GenericSetupExample(std::shared_ptr<ShaderProgram> shader, std::shared_ptr<ShaderProgram> groundShader)
